@@ -12,8 +12,7 @@ const createUser = async (payload: Partial<IUser>) => {
   return user;
 };
 
-// getting all users
-
+// get all users
 const getAllUsers = async () => {
   const users = await User.find({});
 
