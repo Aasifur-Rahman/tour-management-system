@@ -1,7 +1,7 @@
 import { Types } from "mongoose";
 
 export enum Role {
-  SUPERADMIN = "SUPERADMIN",
+  SUPER_ADMIN = "SUPER_ADMIN",
   ADMIN = "ADMIN",
   USER = "USER",
   GUIDE = "GUIDE",
@@ -33,7 +33,7 @@ export interface IUser {
   address?: string;
   isDeleted?: string;
   isActive?: IsActive;
-  isVerified?: string;
+  isVerified?: boolean;
   role: Role;
   //   auths will keep how user logged in
   // why here is array?
