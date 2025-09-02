@@ -5,4 +5,9 @@ const router = Router();
 
 router.post("/login", AuthControllers.credentialsLogin);
 
+// who will use this the person who logged in will use it
+router.post("/refresh-token", AuthControllers.getNewAccessToken);
+
+router.post("/logout", AuthControllers.logOut);
+
 export const AuthRoutes = router;
