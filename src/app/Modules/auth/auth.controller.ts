@@ -86,6 +86,29 @@ const logOut = catchAsync(
   }
 );
 
+const resetPassword = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    // what we need for doing password reset
+    // 1. User must be authenticated
+
+    const newPassword = req.body.newPassword;
+    const oldPassword = req.body.oldPassword;
+    const decodedToken = req.user;
+
+    await AuthServices.resetPassword(oldPassword, newPassword, decodedToken);
+
+    // 2.
+
+    sendResponse(res, {
+      success: true,
+      statusCode: StatusCodes.CREATED,
+      message: "Password changed Successfully",
+      data: null,
+    });
+  }
+);
+
 //user - login - gives token (email, role, _id) this is user identity - booking / payment / payment cancel - token
 // for authenticity you need token
 
@@ -93,4 +116,5 @@ export const AuthControllers = {
   credentialsLogin,
   getNewAccessToken,
   logOut,
+  resetPassword,
 };
