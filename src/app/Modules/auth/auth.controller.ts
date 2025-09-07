@@ -5,6 +5,9 @@ import { StatusCodes } from "http-status-codes";
 import { AuthServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
 import { setAuthCookie } from "../../utils/setCookie";
+import { createUserTokens } from "../../utils/userTokens";
+import { envVars } from "../../config/env";
+import { JwtPayload } from "jsonwebtoken";
 
 const credentialsLogin = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -96,7 +99,11 @@ const resetPassword = catchAsync(
     const oldPassword = req.body.oldPassword;
     const decodedToken = req.user;
 
-    await AuthServices.resetPassword(oldPassword, newPassword, decodedToken);
+    await AuthServices.resetPassword(
+      oldPassword,
+      newPassword,
+      decodedToken as JwtPayload
+    );
 
     // 2.
 
@@ -108,6 +115,24 @@ const resetPassword = catchAsync(
     });
   }
 );
+const googleCallBackController = catchAsync(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async (req: Request, res: Response, next: NextFunction) => {
+    const user = req.user;
+
+    console.log(user);
+
+    if (!user) {
+      throw new AppError(StatusCodes.NOT_FOUND, "User Not Found");
+    }
+
+    const tokenInfo = createUserTokens(user);
+
+    setAuthCookie(res, tokenInfo);
+
+    res.redirect(envVars.FRONTEND_URL);
+  }
+);
 
 //user - login - gives token (email, role, _id) this is user identity - booking / payment / payment cancel - token
 // for authenticity you need token
@@ -117,4 +142,5 @@ export const AuthControllers = {
   getNewAccessToken,
   logOut,
   resetPassword,
+  googleCallBackController,
 };
