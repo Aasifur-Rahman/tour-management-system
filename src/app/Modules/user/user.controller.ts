@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import { UserServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
+import { JwtPayload } from "jsonwebtoken";
 // import { verifyToken } from "../../utils/jwt";
 // import { envVars } from "../../config/env";
 // import { JwtPayload } from "jsonwebtoken";
@@ -33,7 +34,11 @@ const updateUser = catchAsync(
 
     const verifiedToken = req.user;
     const payload = req.body;
-    const user = await UserServices.updateUser(userId, payload, verifiedToken);
+    const user = await UserServices.updateUser(
+      userId,
+      payload,
+      verifiedToken as JwtPayload
+    );
 
     sendResponse(res, {
       success: true,

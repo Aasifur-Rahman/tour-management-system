@@ -118,9 +118,15 @@ const resetPassword = catchAsync(
 const googleCallBackController = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
-    const user = req.user;
+    let redirectTo = req.query.state ? (req.query.state as string) : "";
 
-    console.log(user);
+    if (redirectTo.startsWith("/")) {
+      redirectTo = redirectTo.slice(1);
+    }
+
+    // /booking => booking , => "/" => ""
+
+    const user = req.user;
 
     if (!user) {
       throw new AppError(StatusCodes.NOT_FOUND, "User Not Found");
@@ -130,7 +136,7 @@ const googleCallBackController = catchAsync(
 
     setAuthCookie(res, tokenInfo);
 
-    res.redirect(envVars.FRONTEND_URL);
+    res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
   }
 );
 
