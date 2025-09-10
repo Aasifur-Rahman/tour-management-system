@@ -7,7 +7,60 @@ import {
 import { envVars } from "./env";
 import { User } from "../Modules/user/user.model";
 import { Role } from "../Modules/user/user.interface";
+import { Strategy as localStrategy } from "passport-local";
+import bcryptjs from "bcryptjs";
 
+passport.use(
+  new localStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email: string, password: string, done) => {
+      // validating business logic here
+      try {
+        const isUserExist = await User.findOne({ email });
+
+        if (!isUserExist) {
+          return done(null, false, { message: "User does not exist" });
+        }
+
+        // if (!isUserExist) {
+        //   return done("User does not exist");
+        // }
+
+        // checking it's google or not
+        const isGoogleAuthenticated = isUserExist.auths.some(
+          (providerObjects) => providerObjects.provider === "google"
+        );
+
+        if (isGoogleAuthenticated) {
+          return done(null, false, {
+            message:
+              "You have authenticated through Google. If you want to login with credentials. then at first login with google and set a password and your gmail and then you can login with email and password",
+          });
+        }
+
+        // password hashing
+        const isPasswordMatched = await bcryptjs.compare(
+          password as string,
+          isUserExist.password as string
+        );
+
+        if (!isPasswordMatched) {
+          return done(null, false, { message: "Password does not match" });
+        }
+
+        return done(null, isUserExist);
+      } catch (error) {
+        console.log(error);
+        done(error);
+      }
+    }
+  )
+);
+
+// google
 passport.use(
   new GoogleStrategy(
     {

@@ -8,12 +8,46 @@ import { setAuthCookie } from "../../utils/setCookie";
 import { createUserTokens } from "../../utils/userTokens";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import passport from "passport";
 
 const credentialsLogin = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
-    const loginInfo = await AuthServices.credentialsLogin(req.body);
+    // local here because passport.js set it's name to local
+    passport.authenticate(
+      "local",
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      async (err: any, user: any, info: any) => {
+        if (err) {
+          return new AppError(401, err);
+          // valid another way
+          // return next(err)
+        }
 
+        if (!user) {
+          return new AppError(401, info.message);
+        }
+
+        const userTokens = await createUserTokens(user);
+
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password: pass, ...rest } = user.toObject();
+
+        // two birds in one stone
+        setAuthCookie(res, userTokens);
+
+        sendResponse(res, {
+          success: true,
+          statusCode: StatusCodes.CREATED,
+          message: " New Access Token Retrived Successfully",
+          data: {
+            accessToken: userTokens.accessToken,
+            refreshToken: userTokens.refreshToken,
+            user: rest,
+          },
+        });
+      }
+    )(req, res, next);
     // res.cookie("accessToken", loginInfo.accessToken, {
     //   httpOnly: true,
     //   secure: false,
@@ -25,16 +59,6 @@ const credentialsLogin = catchAsync(
     //   httpOnly: true,
     //   secure: false,
     // });
-
-    // two birds in one stone
-    setAuthCookie(res, loginInfo);
-
-    sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.CREATED,
-      message: " New Access Token Retrived Successfully",
-      data: loginInfo,
-    });
   }
 );
 const getNewAccessToken = catchAsync(
