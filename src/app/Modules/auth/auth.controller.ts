@@ -19,13 +19,16 @@ const credentialsLogin = catchAsync(
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       async (err: any, user: any, info: any) => {
         if (err) {
-          return new AppError(401, err);
+          // ! DO NOT USE THEM
+          // return new AppError(401, err);
           // valid another way
           // return next(err)
+          // ? Correct way
+          return next(new AppError(401, err));
         }
 
         if (!user) {
-          return new AppError(401, info.message);
+          return next(new AppError(401, info.message));
         }
 
         const userTokens = await createUserTokens(user);
