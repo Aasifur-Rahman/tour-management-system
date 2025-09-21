@@ -56,7 +56,9 @@ export const globalErrorHandler = (
     success: false,
     message: message,
     errorSources,
-    err,
+
+    // not for frontend only for development phase
+    err: envVars.NODE_ENV === "development" ? err : null,
     // this defines where does this error come from and which file
     // and here we have set a statement if it's in development we can see the error stack or null
     stack: envVars.NODE_ENV === "development" ? err.stack : null,
