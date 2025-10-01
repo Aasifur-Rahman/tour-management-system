@@ -11,8 +11,9 @@ const createDivision = async (payload: IDivision) => {
   // let slug = `${baseSlug}-division`;
 
   // let counter = 0;
+
   // while (await Division.exists({ slug })) {
-  //   slug = `${slug}-${counter++}`; // dhaka-division-2
+  //   slug = `${slug}-${counter++}`; // dhaka-division-1 if it's not unique it will work like that
   // }
 
   // payload.slug = slug;
