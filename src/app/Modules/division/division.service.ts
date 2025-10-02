@@ -55,6 +55,8 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
     throw new Error("A division with this name already exists");
   }
 
+  
+
   const updatedDivision = await Division.findByIdAndUpdate(id, payload, {
     new: true,
     runValidators: true,
