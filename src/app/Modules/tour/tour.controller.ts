@@ -15,7 +15,7 @@ const createTour = catchAsync(async (req: Request, res: Response) => {
 
 const getAllTours = catchAsync(async (req: Request, res: Response) => {
   const query = req.query;
-  const result = await TourService.getAllTour(query as Record<string, string>);
+  const result = await TourService.getAllTours(query as Record<string, string>);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -57,7 +57,7 @@ const getAllTourTypes = catchAsync(async (req: Request, res: Response) => {
 
 const createTourType = catchAsync(async (req: Request, res: Response) => {
   const { name } = req.body;
-  const result = await TourService.createTourType(name);
+  const result = await TourService.createTourType({ name });
   sendResponse(res, {
     statusCode: 201,
     success: true,
@@ -91,7 +91,7 @@ const deleteTourType = catchAsync(async (req: Request, res: Response) => {
 export const TourController = {
   createTour,
   createTourType,
-  getAllTour,
+  getAllTourTypes,
   deleteTourType,
   updateTourType,
   getAllTours,
