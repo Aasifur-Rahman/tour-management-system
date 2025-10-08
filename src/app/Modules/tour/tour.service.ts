@@ -1,3 +1,4 @@
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { tourSearchableFields } from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
@@ -41,10 +42,10 @@ const createTour = async (payload: ITour) => {
 //     // delete filter["searchTerm"]
 //     // delete filter["sort"]
 
-//     for (const field of excludeField) {
-//         // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-//         delete filter[field]
-//     }
+// for (const field of excludeField) {
+//     // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+//     delete filter[field]
+// }
 
 //     console.log(filter);
 
@@ -52,15 +53,15 @@ const createTour = async (payload: ITour) => {
 //         $or: tourSearchableFields.map(field => ({ [field]: { $regex: searchTerm, $options: "i" } }))
 //     }
 
-//     // [remove][remove][remove](SKip)[][][][][][]
+//      [remove][remove][remove](SKip)[][][][][][]
 
-//     // [][][][][](limit)[remove][remove][remove][remove]
+//     [][][][][](limit)[remove][remove][remove][remove]
 
-//     // 1 page => [1][1][1][1][1][1][1][1][1][1] skip = 0 limit =10
-//     // 2 page => [1][1][1][1][1][1][1][1][1][1]=>skip=>[2][2][2][2][2][2][2][2][2][2]<=limit skip = 10 limit =10
-//     // 3 page => [1][1][1][1][1][1][1][1][1][1]=>skip=>[2][2][2][2][2][2][2][2][2][2]<=limit skip = 20 limit = 10
+//      1 page => [1][1][1][1][1][1][1][1][1][1] skip = 0 limit =10
+//      2 page => [1][1][1][1][1][1][1][1][1][1]=>skip=>[2][2][2][2][2][2][2][2][2][2]<=limit skip = 10 limit =10
+//      3 page => [1][1][1][1][1][1][1][1][1][1]=>skip=>[2][2][2][2][2][2][2][2][2][2]<=limit skip = 20 limit = 10
 
-//     // skip = (page -1) * 10 = 30
+//      skip = (page -1) * 10 = 30
 
 //     // ?page=3&limit=10
 
@@ -93,12 +94,8 @@ const createTour = async (payload: ITour) => {
 const getAllTours = async (query: Record<string, string>) => {
   const queryBuilder = new QueryBuilder(Tour.find(), query);
 
-  const tours = await queryBuilder
-    .search(tourSearchableFields)
-    .filter()
-    .sort()
-    .fields()
-    .paginate();
+  const tours = await queryBuilder.search(tourSearchableFields).filter()
+    .modelQuery;
 
   // const meta = await queryBuilder.getMeta()
 
