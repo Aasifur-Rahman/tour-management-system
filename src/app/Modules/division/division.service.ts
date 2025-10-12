@@ -1,3 +1,5 @@
+import QueryBuilder from "../../utils/QueryBuilder";
+import { divisionSearchableFields } from "./division.constant";
 import { IDivision } from "./division.interface";
 import { Division } from "./division.model";
 
@@ -22,14 +24,24 @@ const createDivision = async (payload: IDivision) => {
   return division;
 };
 
-const getAllDivision = async () => {
-  const divisions = await Division.find({});
-  const totalDivisions = await Division.countDocuments();
+const getAllDivision = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(Division.find(), query);
+
+  const divisions = await queryBuilder
+    .search(divisionSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, meta] = await Promise.all([
+    divisions.build(),
+    divisions.getMeta(),
+  ]);
+
   return {
-    data: divisions,
-    meta: {
-      total: totalDivisions,
-    },
+    data,
+    meta,
   };
 };
 
@@ -54,8 +66,6 @@ const updateDivision = async (id: string, payload: Partial<IDivision>) => {
   if (duplicateDivision) {
     throw new Error("A division with this name already exists");
   }
-
-  
 
   const updatedDivision = await Division.findByIdAndUpdate(id, payload, {
     new: true,

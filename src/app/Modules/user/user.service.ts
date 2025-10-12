@@ -5,6 +5,8 @@ import { User } from "./user.model";
 import bcryptjs from "bcryptjs";
 import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
+import QueryBuilder from "../../utils/QueryBuilder";
+import { userSearchableFields } from "./user.constant";
 
 // here in type we used partial<IUser> cuz i user is will not be same it will take only required ones that's why it's partial here
 const createUser = async (payload: Partial<IUser>) => {
@@ -34,6 +36,32 @@ const createUser = async (payload: Partial<IUser>) => {
   });
 
   return user;
+};
+
+// get all users
+const getAllUsers = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(User.find(), query);
+
+  const users = await queryBuilder
+    .search(userSearchableFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const [data, meta] = await Promise.all([users.build(), users.getMeta()]);
+
+  return {
+    data,
+    meta,
+  };
+};
+
+const getSingleUser = async (id: string) => {
+  const user = await User.findById(id);
+  return {
+    data: user,
+  };
 };
 
 // update user
@@ -89,21 +117,10 @@ const updateUser = async (
   return newUpdateUser;
 };
 
-// get all users
-const getAllUsers = async () => {
-  const users = await User.find({});
-
-  const totalUsers = await User.countDocuments();
-
-  return {
-    data: users,
-    meta: { total: totalUsers },
-  };
-};
-
 export const UserServices = {
   createUser,
   getAllUsers,
+  getSingleUser,
   updateUser,
 };
 
