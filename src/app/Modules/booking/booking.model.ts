@@ -22,7 +22,6 @@ const bookingSchema = new Schema<IBooking>(
       type: Schema.Types.ObjectId,
       //   same as model of tour named
       ref: "Payment",
-      required: true,
     },
     status: {
       type: String,
