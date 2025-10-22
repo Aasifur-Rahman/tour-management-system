@@ -1,7 +1,9 @@
 import { Router } from "express";
-import { checkAuth } from "../../middlewares/checkAuth";
 
 const router = Router();
 
+router.post("/success");
+router.post("/fail");
+router.post("/cancel");
 
-router.get("/", checkAuth.)
+export const PaymentRoutes = router;

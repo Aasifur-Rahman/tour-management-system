@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
 import { User } from "../user/user.model";
@@ -6,6 +7,8 @@ import { Booking } from "./booking.model";
 import { Payment } from "../payment/payment.model";
 import { PAYMENT_STATUS } from "../payment/payment.interface";
 import { Tour } from "../tour/tour.model";
+import { SSLService } from "../sslCommerz/sslCommerz.service";
+import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
 
 const getTransactionId = () => {
   return `tran_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -102,12 +105,33 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
       .populate("tour", "title costFrom")
       .populate("payment");
 
+    // SSL Commerz
+    const userAddress = (updatedBooking?.user as any).address;
+    const userEmail = (updatedBooking?.user as any).email;
+    const userPhoneNumber = (updatedBooking?.user as any).phone;
+    const userName = (updatedBooking?.user as any).name;
+
+    const sslPayload: ISSLCommerz = {
+      address: userAddress,
+      email: userEmail,
+      phoneNumber: userPhoneNumber,
+      name: userName,
+      amount: amount,
+      transactionId: transactionId,
+    };
+
+    const sslPayment = await SSLService.sslPaymentInit(sslPayload);
+
     // this means you have to promise this to the database and insert it
     await session.commitTransaction(); // this is transaction
     // and finally after completing this endSession
     session.endSession();
 
-    return updatedBooking;
+    return {
+      // so FRONTEND Will redirect to this url
+      paymentUrl: sslPayment.GatewayPageURL,
+      booking: updatedBooking,
+    };
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     // this will close every session
@@ -117,6 +141,20 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     throw error;
   }
 };
+
+/* 
+ what will ssl commerz have here?
+ This is what will happen if the payment is success :-
+ => frontend(localhost:5173) -> user -> Tour -> Booking (PENDING) -> payment(UNPAID) -> it will 
+ go to SSLCommerz page -> Payment Complete -> Backend Route 
+ -> Update Payment(PAID) & Booking(CONFIRM) -> redirect to frontend -> Frontend(localhost:5173/payment/success)
+
+ This is what will happen if the payment is unsuccessful due to an error :
+
+  => frontend(localhost:5173) -> user -> Tour -> Booking (PENDING) -> payment(UNPAID) -> it will 
+ go to SSLCommerz page -> Payment failed -> Backend(localhost:5000) Route 
+ -> Update Payment(FAIL/CANCEL) & Booking(FAIL/CANCEL) -> redirect to frontend -> Frontend(localhost:5173/payment/cancel or localhost:5173/payment/fail)
+ */
 
 const getUserBookings = async () => {
   return {};
