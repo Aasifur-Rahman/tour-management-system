@@ -54,13 +54,97 @@ const successPayment = async (query: Record<string, string>) => {
     throw error;
   }
 };
-const failPayment = async () => {
+const failPayment = async (query: Record<string, string>) => {
   // update booking status to FAIL
   // update payment status to FAIL
+
+  const session = await Booking.startSession();
+  session.startTransaction();
+
+  try {
+    // first parameter will have which payment are we updating
+    // second parameter will have what we are upgrading
+    // third parameter will have the session
+
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { transactionId: query.transactionId },
+      // find will not have array here
+      {
+        status: PAYMENT_STATUS.FAILED,
+      },
+
+      { new: true, runValidators: true, session }
+    );
+
+    await Booking.findByIdAndUpdate(
+      updatedPayment?.booking._id,
+      {
+        status: BOOKING_STATUS.FAILED,
+      },
+      // also add session here
+      { runValidators: true, session }
+    );
+
+    await session.commitTransaction();
+
+    session.endSession();
+
+    return {
+      success: false,
+      message: "Payment Failed",
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
-const cancelPayment = async () => {
+const cancelPayment = async (query: Record<string, string>) => {
   // update booking status to CANCEL
   // update payment status to CANCEL
+
+  const session = await Booking.startSession();
+  session.startTransaction();
+
+  try {
+    // first parameter will have which payment are we updating
+    // second parameter will have what we are upgrading
+    // third parameter will have the session
+
+    const updatedPayment = await Payment.findOneAndUpdate(
+      { transactionId: query.transactionId },
+      // find will not have array here
+      {
+        status: PAYMENT_STATUS.CANCELLED,
+      },
+
+      { new: true, runValidators: true, session }
+    );
+
+    await Booking.findByIdAndUpdate(
+      updatedPayment?.booking._id,
+      {
+        status: BOOKING_STATUS.CANCEL,
+      },
+      // also add session here
+      { runValidators: true, session }
+    );
+
+    await session.commitTransaction();
+
+    session.endSession();
+
+    return {
+      success: false,
+      message: "Payment Cancelled",
+    };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
+  }
 };
 
 export const PaymentService = {
