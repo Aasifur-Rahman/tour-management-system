@@ -22,6 +22,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(cookieParser());
 app.use(express.json());
+// now we are working with from data so for form data we have to do this below this will handle form data without any issue
+app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/api/v1", router);

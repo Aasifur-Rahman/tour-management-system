@@ -7,6 +7,7 @@ import { sendResponse } from "../../utils/sendResponse";
 const createDivision = catchAsync(async (req: Request, res: Response) => {
   const payload: IDivision = {
     ...req.body,
+    thumbnail: req.file?.path,
   };
   const result = await DivisionServices.createDivision(payload);
 

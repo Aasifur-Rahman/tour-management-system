@@ -9,16 +9,16 @@ const createDivision = async (payload: IDivision) => {
     throw new Error("A division with this name already exists.");
   }
 
-  const baseSlug = payload.name.toLowerCase().split(" ").join("-");
-  let slug = `${baseSlug}-division`;
+  // const baseSlug = payload.name.toLowerCase().split(" ").join("-");
+  // let slug = `${baseSlug}-division`;
 
-  let counter = 0;
+  // let counter = 0;
 
-  while (await Division.exists({ slug })) {
-    slug = `${slug}-${counter++}`; // dhaka-division-1 if it's not unique it will work like that
-  }
+  // while (await Division.exists({ slug })) {
+  //   slug = `${slug}-${counter++}`; // dhaka-division-1 if it's not unique it will work like that
+  // }
 
-  payload.slug = slug;
+  // payload.slug = slug;
 
   const division = await Division.create(payload);
   return division;

@@ -7,12 +7,18 @@ import {
   updateDivisionSchema,
 } from "./division.validation";
 import { DivisionController } from "./division.controller";
+import { multerUpload } from "../../config/multer.config";
 
 const router = Router();
 
 router.post(
   "/create",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
+  // here we will add multerupload
+  // and if we want to send single image or file we will use single here and if we want to send multiple uploads then we will use Array
+  // we will name the file in file so form data will get the data from the file
+  // form data -> body, file {file: image, data: body text data => req.body => req.body.data}
+  multerUpload.single("file"),
   validateRequest(createDivisionSchema),
   DivisionController.createDivision
 );
