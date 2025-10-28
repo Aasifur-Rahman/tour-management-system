@@ -5,11 +5,6 @@ import { TourService } from "./tour.service";
 import { ITour } from "./tour.interface";
 
 const createTour = catchAsync(async (req: Request, res: Response) => {
-  console.log({
-    body: req.body,
-    files: req.files,
-  });
-
   const payload: ITour = {
     ...req.body,
     // here we are explaining to TS that express.multer.file will be and array [] and mapping them in images
