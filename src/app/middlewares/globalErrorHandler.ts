@@ -5,8 +5,9 @@ import { handleDuplicateError } from "../helpers/handleDuplicateError";
 import { handleCastError } from "../helpers/handleCastError";
 import { handleZodError } from "../helpers/handleZodError";
 import { handleValidationError } from "../helpers/handleValidationError";
+import { deleteImageFromCloudinary } from "../config/cloudinary.config";
 
-export const globalErrorHandler = (
+export const globalErrorHandler = async (
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   err: any,
   req: Request,
@@ -18,6 +19,19 @@ export const globalErrorHandler = (
   let message = `Something Went wrong!! ${err.message}`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let errorSources: any = [];
+
+  //cloudinary file
+  if (req.file) {
+    await deleteImageFromCloudinary(req.file.path);
+  }
+  // cloudinary files
+  if (req.files && Array.isArray(req.files) && req.files.length) {
+    const imageUrls = (req.files as Express.Multer.File[]).map(
+      (file) => file.path
+    );
+
+    await Promise.all(imageUrls.map((url) => deleteImageFromCloudinary(url)));
+  }
 
   // mongoose duplicate error handling
   if (err.code === 11000) {
