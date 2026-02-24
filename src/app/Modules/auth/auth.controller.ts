@@ -31,6 +31,10 @@ const credentialsLogin = catchAsync(
           return next(new AppError(401, info.message));
         }
 
+        if (user.isVerified === false) {
+          return next(new AppError(401, "User is not verified"));
+        }
+
         const userTokens = await createUserTokens(user);
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -42,14 +46,14 @@ const credentialsLogin = catchAsync(
         sendResponse(res, {
           success: true,
           statusCode: StatusCodes.CREATED,
-          message: " New Access Token Retrived Successfully",
+          message: "User Logged In Successfully",
           data: {
             accessToken: userTokens.accessToken,
             refreshToken: userTokens.refreshToken,
             user: rest,
           },
         });
-      }
+      },
     )(req, res, next);
     // res.cookie("accessToken", loginInfo.accessToken, {
     //   httpOnly: true,
@@ -62,7 +66,7 @@ const credentialsLogin = catchAsync(
     //   httpOnly: true,
     //   secure: false,
     // });
-  }
+  },
 );
 const getNewAccessToken = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -72,7 +76,7 @@ const getNewAccessToken = catchAsync(
     if (!refreshToken) {
       throw new AppError(
         StatusCodes.BAD_REQUEST,
-        "No refresh token recieved from cookies"
+        "No refresh token recieved from cookies",
       );
     }
 
@@ -91,7 +95,7 @@ const getNewAccessToken = catchAsync(
       message: " Logged in Successfully",
       data: tokenInfo,
     });
-  }
+  },
 );
 const logOut = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -113,7 +117,7 @@ const logOut = catchAsync(
       message: " User logged out Successfully",
       data: null,
     });
-  }
+  },
 );
 
 const resetPassword = catchAsync(
@@ -129,7 +133,7 @@ const resetPassword = catchAsync(
     await AuthServices.resetPassword(
       oldPassword,
       newPassword,
-      decodedToken as JwtPayload
+      decodedToken as JwtPayload,
     );
 
     // 2.
@@ -140,7 +144,7 @@ const resetPassword = catchAsync(
       message: "Password changed Successfully",
       data: null,
     });
-  }
+  },
 );
 const googleCallBackController = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -164,7 +168,7 @@ const googleCallBackController = catchAsync(
     setAuthCookie(res, tokenInfo);
 
     res.redirect(`${envVars.FRONTEND_URL}/${redirectTo}`);
-  }
+  },
 );
 
 //user - login - gives token (email, role, _id) this is user identity - booking / payment / payment cancel - token

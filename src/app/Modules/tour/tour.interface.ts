@@ -26,4 +26,6 @@ export interface ITour {
   //   tour type will have different collection it will help you for
   // filtering so we will set it to Types.ObjectID
   tourType: Types.ObjectId;
+  // add this to delete the image array which will be deleted
+  deleteImages?: string[];
 }

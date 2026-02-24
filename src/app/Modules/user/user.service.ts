@@ -7,20 +7,21 @@ import { envVars } from "../../config/env";
 import { JwtPayload } from "jsonwebtoken";
 import QueryBuilder from "../../utils/QueryBuilder";
 import { userSearchableFields } from "./user.constant";
+import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 
 // here in type we used partial<IUser> cuz i user is will not be same it will take only required ones that's why it's partial here
 const createUser = async (payload: Partial<IUser>) => {
   const { email, password, ...rest } = payload;
 
-  // const isUserExist = await User.findOne({ email });
+  const isUserExist = await User.findOne({ email });
 
-  // if (isUserExist) {
-  //   throw new AppError(StatusCodes.BAD_REQUEST, "User Already Exist");
-  // }
+  if (isUserExist) {
+    throw new AppError(StatusCodes.BAD_REQUEST, "User Already Exist");
+  }
 
   const hashedPassword = await bcryptjs.hash(
     password as string,
-    Number(envVars.BCRYPT_SALT_ROUND)
+    Number(envVars.BCRYPT_SALT_ROUND),
   );
 
   const authProvider: IAuthProvider = {
@@ -58,7 +59,7 @@ const getAllUsers = async (query: Record<string, string>) => {
 };
 
 const getSingleUser = async (id: string) => {
-  const user = await User.findById(id);
+  const user = await User.findById(id).select("-password");
   return {
     data: user,
   };
@@ -69,7 +70,7 @@ const getSingleUser = async (id: string) => {
 const updateUser = async (
   userId: string,
   payload: Partial<IUser>,
-  decodedToken: JwtPayload
+  decodedToken: JwtPayload,
 ) => {
   const ifUserExist = await User.findById(userId);
 
@@ -105,7 +106,7 @@ const updateUser = async (
   if (payload.password) {
     payload.password = await bcryptjs.hash(
       payload.password,
-      envVars.BCRYPT_SALT_ROUND
+      envVars.BCRYPT_SALT_ROUND,
     );
   }
 
@@ -113,6 +114,10 @@ const updateUser = async (
     new: true,
     runValidators: true,
   });
+
+  if (payload.picture && ifUserExist.picture) {
+    await deleteImageFromCloudinary(ifUserExist.picture);
+  }
 
   return newUpdateUser;
 };

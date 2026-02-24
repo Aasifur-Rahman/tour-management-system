@@ -4,6 +4,7 @@ import { UserServices } from "./user.service";
 import { catchAsync } from "../../utils/catchAsync";
 import { sendResponse } from "../../utils/sendResponse";
 import { JwtPayload } from "jsonwebtoken";
+import { IUser } from "./user.interface";
 // import { verifyToken } from "../../utils/jwt";
 // import { envVars } from "../../config/env";
 // import { JwtPayload } from "jsonwebtoken";
@@ -19,7 +20,7 @@ const createUser = catchAsync(
       message: "User created Successfully",
       data: user,
     });
-  }
+  },
 );
 
 const updateUser = catchAsync(
@@ -33,11 +34,14 @@ const updateUser = catchAsync(
     // ) as JwtPayload;
 
     const verifiedToken = req.user;
-    const payload = req.body;
+    const payload: IUser = {
+      ...req.body,
+      picture: req.file?.path,
+    };
     const user = await UserServices.updateUser(
       userId,
       payload,
-      verifiedToken as JwtPayload
+      verifiedToken as JwtPayload,
     );
 
     sendResponse(res, {
@@ -46,7 +50,7 @@ const updateUser = catchAsync(
       message: "User updated Successfully",
       data: user,
     });
-  }
+  },
 );
 
 const getAllUsers = catchAsync(
@@ -54,7 +58,7 @@ const getAllUsers = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const query = req.query;
     const result = await UserServices.getAllUsers(
-      query as Record<string, string>
+      query as Record<string, string>,
     );
 
     sendResponse(res, {
@@ -64,7 +68,7 @@ const getAllUsers = catchAsync(
       data: result.data,
       meta: result.meta,
     });
-  }
+  },
 );
 
 const getSingleUser = catchAsync(async (req: Request, res: Response) => {
