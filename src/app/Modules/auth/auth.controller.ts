@@ -137,32 +137,20 @@ const changePassword = catchAsync(async (req: Request, res: Response, next: Next
     })
 })
 
-const resetPassword = catchAsync(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async (req: Request, res: Response, next: NextFunction) => {
-    // what we need for doing password reset
-    // 1. User must be authenticated
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const resetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 
-    const newPassword = req.body.newPassword;
-    const oldPassword = req.body.oldPassword;
-    const decodedToken = req.user;
+    const decodedToken = req.user
 
-    await AuthServices.resetPassword(
-      oldPassword,
-      newPassword,
-      decodedToken as JwtPayload,
-    );
-
-    // 2.
+    await AuthServices.resetPassword(req.body, decodedToken as JwtPayload);
 
     sendResponse(res, {
-      success: true,
-      statusCode: StatusCodes.CREATED,
-      message: "Password changed Successfully",
-      data: null,
-    });
-  },
-);
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Password Changed Successfully",
+        data: null,
+    })
+})
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const setPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
 

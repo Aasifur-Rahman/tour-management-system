@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { StatusCodes } from "http-status-codes";
 import AppError from "../../errorHelpers/AppError";
 import { User } from "../user/user.model";
@@ -50,30 +51,26 @@ const getNewAccessToken = async (refreshToken: string) => {
   };
 };
 
-const resetPassword = async (
-  oldPassword: string,
-  newPassword: string,
-  decodedToken: JwtPayload,
-) => {
-  const user = await User.findById(decodedToken.userId);
-  const isOldPasswordMatch = await bcryptjs.compare(
-    oldPassword,
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    user!.password as string,
-  );
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const resetPassword = async (payload: Record<string, any>, decodedToken: JwtPayload) => {
+    if (payload.id != decodedToken.userId) {
+        throw new AppError(401, "You can not reset your password")
+    }
 
-  if (!isOldPasswordMatch) {
-    throw new AppError(StatusCodes.UNAUTHORIZED, "Old password does not match");
-  }
+    const isUserExist = await User.findById(decodedToken.userId)
+    if (!isUserExist) {
+        throw new AppError(401, "User does not exist")
+    }
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  user!.password = await bcryptjs.hash(
-    newPassword,
-    Number(envVars.BCRYPT_SALT_ROUND),
-  );
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  user!.save();
-};
+    const hashedPassword = await bcryptjs.hash(
+        payload.newPassword,
+        Number(envVars.BCRYPT_SALT_ROUND)
+    )
+
+    isUserExist.password = hashedPassword;
+
+    await isUserExist.save()
+}
 
 
 const forgotPassword = async (email: string) => {
