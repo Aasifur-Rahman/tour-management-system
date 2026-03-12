@@ -1,8 +1,16 @@
+import { envVars } from "./app/config/env";
 import app from "./app";
 import mongoose from "mongoose";
 import { Server } from "http";
-import { envVars } from "./app/config/env";
 import { seedSuperAdmin } from "./app/utils/seedSuperAdmin";
+import { connectRedis } from "./app/config/redis.config";
+
+// import dns from "dns";
+
+//  dns.setServers(["1.1.1.1", "8.8.8.8"])
+
+
+
 // make this first
 let server: Server;
 
@@ -12,6 +20,8 @@ const startServer = async () => {
     // connect to mongodbatlas via connection string
     console.log(envVars.NODE_ENV);
     await mongoose.connect(envVars.DB_URL);
+    
+  
     console.log("Connected to DB");
 
     // 3rd make this listening to the port like this
@@ -24,6 +34,7 @@ const startServer = async () => {
 };
 
 (async () => {
+  await connectRedis()
   await startServer();
   await seedSuperAdmin();
 })();

@@ -120,6 +120,23 @@ const logOut = catchAsync(
   },
 );
 
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const changePassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    const newPassword = req.body.newPassword;
+    const oldPassword = req.body.oldPassword;
+    const decodedToken = req.user
+
+    await AuthServices.changePassword(oldPassword, newPassword, decodedToken as JwtPayload);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Password Changed Successfully",
+        data: null,
+    })
+})
+
 const resetPassword = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
@@ -146,6 +163,39 @@ const resetPassword = catchAsync(
     });
   },
 );
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const setPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+    const decodedToken = req.user as JwtPayload
+    const { password } = req.body;
+
+    await AuthServices.setPassword(decodedToken.userId, password);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Password Changed Successfully",
+        data: null,
+    })
+})
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const forgotPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+
+
+    const { email } = req.body;
+
+    await AuthServices.forgotPassword(email);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: StatusCodes.OK,
+        message: "Email Sent Successfully",
+        data: null,
+    })
+})
+
+
 const googleCallBackController = catchAsync(
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async (req: Request, res: Response, next: NextFunction) => {
@@ -179,5 +229,8 @@ export const AuthControllers = {
   getNewAccessToken,
   logOut,
   resetPassword,
+  changePassword,
+  setPassword,
+  forgotPassword,
   googleCallBackController,
 };
