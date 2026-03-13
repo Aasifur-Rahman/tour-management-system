@@ -1,6 +1,8 @@
 import crypto from "crypto"
 import { redisClient } from "../../config/redis.config"
 import { sendEmail } from "../../utils/sendEmail"
+import AppError from "../../errorHelpers/AppError"
+import { User } from "../user/user.model"
 
 // first we will need the otp expiration
 const OTP_EXPIRATION = 2 * 60 // 2 MIN  TIMER
@@ -17,6 +19,20 @@ const generateOtp = (length = 6) => {
 }
 
 const sendOTP = async (email: string, name: string) => {
+
+    const user = await User.findOne({email})
+
+    // if the user does not exist
+    if (!user){
+        throw new AppError(404, "User not found")
+    }
+
+    // if the user is already verified
+    if (user.isVerified){
+        throw new AppError(401, "You are already verified")
+    }
+
+
     const otp = generateOtp();
 
 // redis key should be unique for user
@@ -45,7 +61,41 @@ const sendOTP = async (email: string, name: string) => {
     })
 }
 
- const verifyOTP = async ()  => {
+ const verifyOTP = async (email: string, otp: string)  => {
+
+ const user = await User.findOne({email})
+
+    // if the user does not exist
+    if (!user){
+        throw new AppError(404, "User not found")
+    }
+
+    // if the user is already verified
+    if (user.isVerified){
+        throw new AppError(401, "You are already verified")
+    }
+
+
+    const redisKey = `otp:${email}`
+
+    const savedOtp = await redisClient.get(redisKey)
+
+    if (!savedOtp){
+        throw new AppError(401, "Invalid OTP");
+    }
+
+    if (savedOtp !== otp) {
+        throw new AppError(401,  "Invalid OTP")
+    }
+
+    // update one here cuz the otp will be verified  so we need to update the isVerified to true
+    
+
+    await Promise.all([
+User.updateOne({email}, {isVerified: true}, {runValidators: true}),
+redisClient.del([redisKey])
+    ])
+
     return {};
 }
 
