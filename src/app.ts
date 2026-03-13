@@ -27,6 +27,10 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
 app.use("/api/v1", router);
+app.use((req, res, next) => {
+  console.log("Request URL:", req.originalUrl)
+  next()
+})
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({

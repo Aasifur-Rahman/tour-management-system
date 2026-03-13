@@ -1,5 +1,8 @@
 import crypto from "crypto"
 import { redisClient } from "../../config/redis.config"
+import { sendEmail } from "../../utils/sendEmail"
+
+// first we will need the otp expiration
 const OTP_EXPIRATION = 2 * 60 // 2 MIN  TIMER
 
 //length parameter set to 6 as default if it's not given
@@ -13,7 +16,7 @@ const generateOtp = (length = 6) => {
     return otp
 }
 
-export const sendOTP = async (email: string, name: string) => {
+const sendOTP = async (email: string, name: string) => {
     const otp = generateOtp();
 
 // redis key should be unique for user
@@ -31,9 +34,22 @@ export const sendOTP = async (email: string, name: string) => {
 
     // now the otp is ready it's time to send it to the email 
 
+    await sendEmail({
+        to: email, 
+        subject: "Your OTP Code",
+        templateName: "otp",
+        templateData: {
+            name: name,
+            otp:  otp,
+        }
+    })
+}
+
+ const verifyOTP = async ()  => {
     return {};
 }
 
-export const verify = async ()  => {
-    return {};
+export const OTPService = {
+    sendOTP,
+    verifyOTP
 }
