@@ -16,7 +16,7 @@ app.use(
     secret: envVars.EXPRESS_SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
-  })
+  }),
 );
 app.use(passport.initialize());
 app.use(passport.session());
@@ -24,13 +24,18 @@ app.use(cookieParser());
 app.use(express.json());
 // now we are working with from data so for form data we have to do this below this will handle form data without any issue
 app.use(express.urlencoded({ extended: true }));
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true,
+  }),
+);
 
 app.use("/api/v1", router);
 app.use((req, res, next) => {
-  console.log("Request URL:", req.originalUrl)
-  next()
-})
+  console.log("Request URL:", req.originalUrl);
+  next();
+});
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
