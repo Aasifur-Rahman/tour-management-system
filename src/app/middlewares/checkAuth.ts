@@ -11,7 +11,7 @@ export const checkAuth =
   (...authRoles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const accessToken = req.headers.authorization;
+      const accessToken = req.headers.authorization || req.cookies.accessToken;
 
       if (!accessToken) {
         throw new AppError(403, "No Token Recieved");
@@ -19,7 +19,7 @@ export const checkAuth =
 
       const verifiedToken: JwtPayload = verifyToken(
         accessToken,
-        envVars.JWT_ACCESS_SECRET
+        envVars.JWT_ACCESS_SECRET,
       ) as JwtPayload;
 
       const isUserExist = await User.findOne({
@@ -35,7 +35,7 @@ export const checkAuth =
       ) {
         throw new AppError(
           StatusCodes.BAD_REQUEST,
-          `User is ${isUserExist.isActive}`
+          `User is ${isUserExist.isActive}`,
         );
       }
       if (isUserExist.isDeleted) {
