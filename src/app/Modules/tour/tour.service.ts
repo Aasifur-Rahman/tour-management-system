@@ -1,6 +1,9 @@
 import { deleteImageFromCloudinary } from "../../config/cloudinary.config";
 import QueryBuilder from "../../utils/QueryBuilder";
-import { tourSearchableFields } from "./tour.constant";
+import {
+  tourSearchableFields,
+  tourTypeSearchableFields,
+} from "./tour.constant";
 import { ITour, ITourType } from "./tour.interface";
 import { Tour, TourType } from "./tour.model";
 
@@ -79,7 +82,7 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
     // we will do filter here instead of map
     // this is done to get the updated images
     const restDBImages = existingTour.images.filter((imageUrl) =>
-      payload.deleteImages?.includes(imageUrl)
+      payload.deleteImages?.includes(imageUrl),
     );
     // this is cause of deleting updated images that are not needed by user
     const updatedPayloadImages = (payload.images || [])
@@ -102,7 +105,7 @@ const updateTour = async (id: string, payload: Partial<ITour>) => {
     existingTour.images.length > 0
   ) {
     await Promise.all(
-      payload.deleteImages.map((url) => deleteImageFromCloudinary(url))
+      payload.deleteImages.map((url) => deleteImageFromCloudinary(url)),
     );
   }
 
@@ -122,8 +125,24 @@ const createTourType = async (payload: ITourType) => {
 
   return await TourType.create({ name: payload.name });
 };
-const getAllTourTypes = async () => {
-  return await TourType.find();
+const getAllTourTypes = async (query: Record<string, string>) => {
+  const queryBuilder = new QueryBuilder(TourType.find(), query);
+  const tourTypes = await queryBuilder
+    .search(tourTypeSearchableFields)
+    .filter()
+    .sort()
+    .fields()
+    .paginate();
+
+  const [data, meta] = await Promise.all([
+    tourTypes.build(),
+    queryBuilder.getMeta(),
+  ]);
+
+  return {
+    data,
+    meta,
+  };
 };
 
 const getSingleTourTypes = async (slug: string) => {
