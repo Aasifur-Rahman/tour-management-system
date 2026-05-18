@@ -9,10 +9,7 @@ import { PAYMENT_STATUS } from "../payment/payment.interface";
 import { Tour } from "../tour/tour.model";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
-
-const getTransactionId = () => {
-  return `tran_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-};
+import { getTransactionId } from "../../utils/getTransactionId";
 
 /* 
   ..What transaction roll back will do?
@@ -51,7 +48,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     if (!user?.phone || !user.address) {
       throw new AppError(
         StatusCodes.BAD_REQUEST,
-        "Please Update Your profile to Book a Tour"
+        "Please Update Your profile to Book a Tour",
       );
     }
 
@@ -75,7 +72,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
           ...payload,
         },
       ],
-      { session }
+      { session },
     );
 
     const payment = await Payment.create(
@@ -88,7 +85,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
           amount: amount,
         },
       ],
-      { session }
+      { session },
     );
 
     const updatedBooking = await Booking.findByIdAndUpdate(
@@ -99,7 +96,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
         payment: payment[0]._id,
       },
       // also add session here
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     )
       .populate("user", "name email phone address")
       .populate("tour", "title costFrom")
@@ -121,7 +118,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     };
 
     const sslPayment = await SSLService.sslPaymentInit(sslPayload);
-
+    console.log(sslPayment.GatewayPageURL);
     // this means you have to promise this to the database and insert it
     await session.commitTransaction(); // this is transaction
     // and finally after completing this endSession

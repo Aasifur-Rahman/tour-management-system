@@ -7,7 +7,7 @@ const tourTypeSchema = new Schema<ITourType>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 export const TourType = model<ITourType>("TourType", tourTypeSchema);
@@ -48,11 +48,11 @@ const tourSchema = new Schema<ITour>(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 // create pre hook
-tourSchema.pre("save", async function (next) {
+tourSchema.pre("save", async function () {
   if (this.isModified("title")) {
     const baseSlug = this.title.toLowerCase().split(" ").join("-");
     let slug = `${baseSlug}-division`;
@@ -63,12 +63,10 @@ tourSchema.pre("save", async function (next) {
     }
     this.slug = slug;
   }
-
-  next();
 });
 
 // update pre hook
-tourSchema.pre("findOneAndUpdate", async function (next) {
+tourSchema.pre("findOneAndUpdate", async function () {
   const tour = this.getUpdate() as Partial<ITour>;
 
   if (tour.title) {
@@ -84,8 +82,6 @@ tourSchema.pre("findOneAndUpdate", async function (next) {
   }
 
   this.setUpdate(tour);
-
-  next();
 });
 
 export const Tour = model<ITour>("Tour", tourSchema);

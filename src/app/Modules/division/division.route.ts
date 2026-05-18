@@ -20,7 +20,7 @@ router.post(
   // form data -> body, file {file: image, data: body text data => req.body => req.body.data}
   multerUpload.single("file"),
   validateRequest(createDivisionSchema),
-  DivisionController.createDivision
+  DivisionController.createDivision,
 );
 
 router.get("/", DivisionController.getAllDivisions);
@@ -30,12 +30,12 @@ router.patch(
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
   multerUpload.single("file"),
   validateRequest(updateDivisionSchema),
-  DivisionController.updateDivision
+  DivisionController.updateDivision,
 );
 router.delete(
   "/:id",
   checkAuth(Role.ADMIN, Role.SUPER_ADMIN),
-  DivisionController.deleteDivision
+  DivisionController.deleteDivision,
 );
 
 export const DivisionRoutes = router;

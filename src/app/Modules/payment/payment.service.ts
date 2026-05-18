@@ -7,9 +7,6 @@ import { PAYMENT_STATUS } from "./payment.interface";
 import { Payment } from "./payment.model";
 import { SSLService } from "../sslCommerz/sslCommerz.service";
 import { ISSLCommerz } from "../sslCommerz/sslCommerz.interface";
-import { catchAsync } from "../../utils/catchAsync";
-import { Request, Response } from "express";
-import mongoose from "mongoose";
 
 // we will get it from query
 
@@ -19,7 +16,7 @@ const initPayment = async (bookingId: string) => {
   if (!payment) {
     throw new AppError(
       StatusCodes.NOT_FOUND,
-      "Payment Not Found. You did not booked this tour"
+      "Payment Not Found. You did not booked this tour",
     );
   }
 
@@ -42,6 +39,7 @@ const initPayment = async (bookingId: string) => {
 
   const sslPayment = await SSLService.sslPaymentInit(sslPayload);
 
+  console.log(sslPayment);
   return {
     paymentUrl: sslPayment.GatewayPageURL,
   };
@@ -66,7 +64,7 @@ const successPayment = async (query: Record<string, string>) => {
         status: PAYMENT_STATUS.PAID,
       },
 
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     await Booking.findByIdAndUpdate(
@@ -75,7 +73,7 @@ const successPayment = async (query: Record<string, string>) => {
         status: BOOKING_STATUS.COMPLETE,
       },
       // also add session here
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     )
       .populate("user", "name email phone address")
       .populate("tour", "title costFrom")
@@ -115,7 +113,7 @@ const failPayment = async (query: Record<string, string>) => {
         status: PAYMENT_STATUS.FAILED,
       },
 
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     await Booking.findByIdAndUpdate(
@@ -124,7 +122,7 @@ const failPayment = async (query: Record<string, string>) => {
         status: BOOKING_STATUS.FAILED,
       },
       // also add session here
-      { runValidators: true, session }
+      { runValidators: true, session },
     );
 
     await session.commitTransaction();
@@ -161,7 +159,7 @@ const cancelPayment = async (query: Record<string, string>) => {
         status: PAYMENT_STATUS.CANCELLED,
       },
 
-      { new: true, runValidators: true, session }
+      { new: true, runValidators: true, session },
     );
 
     await Booking.findByIdAndUpdate(
@@ -170,7 +168,7 @@ const cancelPayment = async (query: Record<string, string>) => {
         status: BOOKING_STATUS.CANCEL,
       },
       // also add session here
-      { runValidators: true, session }
+      { runValidators: true, session },
     );
 
     await session.commitTransaction();
@@ -188,8 +186,6 @@ const cancelPayment = async (query: Record<string, string>) => {
     throw error;
   }
 };
-
-
 
 export const PaymentService = {
   initPayment,
