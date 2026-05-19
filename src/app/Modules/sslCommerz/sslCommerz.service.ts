@@ -46,8 +46,6 @@ const sslPaymentInit = async (payload: ISSLCommerz) => {
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
     });
 
-    console.log("SSL full response", response.data);
-
     return response.data;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

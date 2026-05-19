@@ -118,7 +118,7 @@ const createBooking = async (payload: Partial<IBooking>, userId: string) => {
     };
 
     const sslPayment = await SSLService.sslPaymentInit(sslPayload);
-    console.log(sslPayment.GatewayPageURL);
+
     // this means you have to promise this to the database and insert it
     await session.commitTransaction(); // this is transaction
     // and finally after completing this endSession
